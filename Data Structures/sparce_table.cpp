@@ -2,6 +2,10 @@ template <typename T> class SparseTable {
   private:
 	int n, log2dist;
 	vector<vector<T>> st;
+    //change f to ur desired function
+    T f(T a,T b){
+        return min(a,b);
+    }
   public:
 	SparseTable(const vector<T> &v) {
 		n = (int)v.size();
@@ -11,13 +15,13 @@ template <typename T> class SparseTable {
 		for (int i = 1; i < log2dist; i++) {
 			st[i].resize(n - (1 << i) + 1);
 			for (int j = 0; j + (1 << i) <= n; j++) {
-				st[i][j] = min(st[i - 1][j], st[i - 1][j + (1 << (i - 1))]);
+				st[i][j] = f(st[i - 1][j], st[i - 1][j + (1 << (i - 1))]);
 			}
 		}
 	}
 	/** @return minimum on the range [l, r] */
 	T query(int l, int r) {
 		int i = (int)log2(r - l + 1);
-		return min(st[i][l], st[i][r - (1 << i) + 1]);
+		return f(st[i][l], st[i][r - (1 << i) + 1]);
 	}
 };

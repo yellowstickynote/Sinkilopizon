@@ -31,3 +31,11 @@ struct ModInt {
     }
 };
 using mint = ModInt<1000000007>;
+
+/* QUICK DOCS:
+   * ModInt(v)      : Constructor. Auto-modulos v (handles negatives).
+   * +, -, *, /     : Standard arithmetic. Division uses modular inverse.
+   * cin >>, cout <<: Supports standard stream IO.
+   * inv()          : Returns val^(MOD-2) % MOD. Requires prime MOD.
+   * power(a, b)    : Returns a^b % MOD via binary exponentiation.
+*/

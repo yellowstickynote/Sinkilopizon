@@ -18,9 +18,9 @@ for i in {1..500}; do
     fi
 	if [ "$brtout" != "$solout" ]; then
 		echo -e "\e[31mfailed on test $i\e"
-		echo $input > failed.in
-		echo $brtout > correct.txt
-		echo $solout > wrong.txt
+		echo -e "$input" > failed.in
+		echo -e "$brtout" > correct.txt
+		echo -e "$solout" > wrong.txt
 		break
 	fi
 	echo -e "\e[32maccepted on test $i\e"

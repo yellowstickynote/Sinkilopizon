@@ -1,29 +1,41 @@
+#include <vector>
+#include <algorithm>
+#include <cmath>
+
+using namespace std;
+
 struct MoQuery {
     int l, r, id;
 };
 
 struct MoSolver {
     int n;
-    int block_size;
+    long long block_size;
     vector<MoQuery> queries;
     
-    function<void(int,bool)> add;
-    function<void(int,bool)> remove;
-    function<void(int)> answer;
+    // DEFINE GLOBAL STATE HERE
 
-    MoSolver(int _n, const vector<MoQuery>& _queries,
-             function<void(int,bool)> _add,
-             function<void(int,bool)> _remove,
-             function<void(int)> _answer)
-        : n(_n), queries(_queries), add(_add), remove(_remove), answer(_answer) 
-    {
-        block_size = max(1LL, (int)(n / sqrt(queries.size())));
+    MoSolver(int _n, const vector<MoQuery>& _queries) : n(_n), queries(_queries) {
+        block_size = max(1LL, (long long)(n / sqrt(queries.size())));
+        // INITIALIZE STATE HERE
+    }
+
+    void add(int i) {
+        
+    }
+
+    void remove(int i) {
+        
+    }
+
+    void answer(int i) {
+        
     }
 
     void solve() {
         sort(queries.begin(), queries.end(), [&](const MoQuery& a, const MoQuery& b) {
-            int block_a = a.l / block_size;
-            int block_b = b.l / block_size;
+            long long block_a = a.l / block_size;
+            long long block_b = b.l / block_size;
             if (block_a != block_b) return block_a < block_b;
             return (block_a % 2 == 1) ? (a.r < b.r) : (a.r > b.r);
         });
@@ -32,10 +44,22 @@ struct MoSolver {
         int curr_r = -1;
 
         for (const auto& q : queries) {
-            while (curr_l > q.l) add(--curr_l,false);
-            while (curr_r < q.r) add(++curr_r,true);
-            while (curr_l < q.l) remove(curr_l++,false);
-            while (curr_r > q.r) remove(curr_r--,true);
+            while (curr_l > q.l) {
+                curr_l--;
+                add(curr_l);
+            }
+            while (curr_r < q.r) {
+                curr_r++;
+                add(curr_r);
+            }
+            while (curr_l < q.l) {
+                remove(curr_l);
+                curr_l++;
+            }
+            while (curr_r > q.r) {
+                remove(curr_r);
+                curr_r--;
+            }
             answer(q.id);
         }
     }
@@ -45,38 +69,21 @@ struct MoSolver {
    ---------------------
    Structure: MoQuery { int l, int r, id; }
    
-   Constructor Parameters:
-   1. n: Size of the array (used to calculate block size).
-   2. queries: Vector of MoQuery objects.
-   3. add(index): Adds the element at `index` (in original array) to current state.
-   4. remove(index): Removes the element at `index` from current state.
-   5. answer(query_id): Saves the current state as the answer for query `query_id`.
-
-   Performance Note:
-   This template uses the "Serpentine Sorting" optimization (alternating R direction),
-   which reduces movement of the R pointer significantly compared to standard block sorting.
-
-   Example: Count Distinct Elements in Range
-   -----------------------------------------
-   int current_distinct = 0;
-   vector<int> cnt(MAX_VAL, 0);
-   vector<int> answers(queries.size());
-
-   MoSolver mo(
-       n, queries,
-       // Add: if count becomes 1, it's a new distinct element
-       [&](int idx) { 
-           if (++cnt[arr[idx]] == 1) current_distinct++; 
-       },
-       // Remove: if count drops to 0, we lost a distinct element
-       [&](int idx) { 
-           if (--cnt[arr[idx]] == 0) current_distinct--; 
-       },
-       // Answer: store current state
-       [&](int id) { 
-           answers[id] = current_distinct; 
-       }
-   );
-   
-   mo.solve();
+   1. Setup:
+      - Define your state variables (e.g., frequency array, count) inside the struct.
+      - Initialize them in the constructor.
+      
+   2. Implementation:
+      - add(i): Update state when adding index `i` to the range.
+      - remove(i): Update state when removing index `i` from the range.
+      - answer(i): Store the current answer for query index `i`.
+      
+   3. Execution:
+      MoSolver mo(n, queries);
+      mo.solve();
+      
+   Notes:
+   - Uses Serpentine Sorting for O(N * sqrt(Q)) optimization.
+   - `i` refers to the index in the original array (0-based) for add/remove.
+   - `i` refers to the query ID for answer.
 */

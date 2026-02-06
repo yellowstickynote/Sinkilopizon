@@ -5,6 +5,7 @@ rm -rf stress/*
 g++ gen.cpp -o stress/gen
 g++ brt.cpp -o stress/brt
 g++ sol.cpp -o stress/sol
+g++ verif.cpp -o stress/verif
 cd stress
 for i in {1..500}; do
 	input=`./gen`
@@ -16,7 +17,9 @@ for i in {1..500}; do
         echo "$input" > failed.in
         break
     fi
-	if [ "$brtout" != "$solout" ]; then
+	echo "$input $brtout $solout"
+	ver=$(./verif <<< "$input $brtout $solout")
+	if [ "$ver" != "0" ]; then
 		echo -e "\e[31mfailed on test $i\e"
 		echo -e "$input" > failed.in
 		echo -e "$brtout" > correct.txt

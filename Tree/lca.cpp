@@ -24,7 +24,7 @@ struct TreeLCA {
         LOG = 32 - __builtin_clz(n);
         g.assign(n + 1, {});
         depth.assign(n + 1, 0);
-
+        up.assign(LOG, vector<int>(n + 1, 0));
     }
 
     void add_edge(int u, int v) {

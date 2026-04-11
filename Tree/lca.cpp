@@ -1,16 +1,8 @@
 //TreeLCA T(n);
-//for (int i = 1; i <= n; ++i) cin >> T.val[i];
-//for (int i = 0; i < n-1; ++i) {
-//    int u, v; cin >> u >> v;
-//    T.add_edge(u, v);
-//}
+//T.add_edge(u, v);
 //T.build(1);
-// then:
 // T.lca(u, v);
 // T.kth_parent(u, k);
-// T.sum_on_path(u, v);
-// T.min_on_path(u, v);
-// T.max_on_path(u, v);
 struct TreeLCA {
     struct Agg {
         long long sum;
@@ -79,52 +71,5 @@ struct TreeLCA {
             }
         }
         return up[0][a];
-    }
-
-    Agg merge(const Agg &A, const Agg &B) {
-        return {A.sum + B.sum,
-                min(A.mn, B.mn),
-                max(A.mx, B.mx)};
-    }
-
-    // path from v up by `steps` edges, including start and end
-    Agg climb(int v, int steps) {
-        Agg res{val[v], val[v], val[v]}; // start with node v
-        for (int i = 0; i < LOG; ++i) {
-            if (steps & (1 << i)) {
-                res.sum += upSum[i][v];
-                res.mn = min(res.mn, upMin[i][v]);
-                res.mx = max(res.mx, upMax[i][v]);
-                v = up[i][v];
-            }
-        }
-        return res;
-    }
-
-    // aggregate over simple path a-b (all node values)
-    Agg path_agg(int a, int b) {
-        int c = lca(a, b);
-
-        // a -> c (inclusive)
-        Agg A = climb(a, depth[a] - depth[c]);
-        if (b == c) return A;
-
-        // b -> child of c (inclusive), exclude c to avoid double-count
-        int steps = depth[b] - depth[c] - 1;
-        Agg B = climb(b, steps);
-
-        return merge(A, B);
-    }
-
-    long long sum_on_path(int a, int b) {
-        return path_agg(a, b).sum;
-    }
-
-    long long min_on_path(int a, int b) {
-        return path_agg(a, b).mn;
-    }
-
-    long long max_on_path(int a, int b) {
-        return path_agg(a, b).mx;
     }
 };

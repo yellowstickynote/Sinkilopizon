@@ -1,28 +1,4 @@
-#include <bits/stdc++.h>
-using namespace std;
-#ifdef MYPC
-#include "debug.cpp"
-#else
-#define debug(...)
-#define debugArr(...)
-#endif
-#include <ext/pb_ds/assoc_container.hpp>
-using namespace __gnu_pbds;
-template <class T>
-using Tree =tree<T, null_type, less<T>, rb_tree_tag, tree_order_statistics_node_update>;
-
-#define pb push_back
-#define eb emplace_back
-#define fi first
-#define se second
-typedef pair<int, int> pint;
-#define vint vector<int>
-#define fast_cin()                                                           \
-    ios_base::sync_with_stdio(false);                                         \
-    cin.tie(NULL);                                                           \
-    cout.tie(NULL)
-constexpr int mod = 1e9+7;
-
+//change merge and DEFAULT to customize
 struct SegTree {
     static int merge(int a, int b) {
         return a + b;
@@ -89,50 +65,4 @@ struct SegTree {
         );
     }
 };
-
-void solve() {
-    int n,Q; cin>>n>>Q;
-    int A = 5e5+5;
-    SegTree sgt(n);
-    sgt.build(vint(n));
-    int a[n]; for(int i = 0; i<n; i++) cin>>a[i];
-    vector<int> pref(n+1);
-    pref[0] = sgt.build(vint(A));
-    vint mp(A,-1);
-    for(int i = 0; i<n; i++){
-        pref[i+1] = pref[i];
-        if(mp[a[i]]!=-1) pref[i+1] = sgt.update(pref[i+1],mp[a[i]],i-mp[a[i]]);
-        mp[a[i]] = i;
-    }
-    int ans = 0;
-    while(Q--){
-        int x,y; cin>>x>>y;
-        int p = (x^ans)%n;
-        int q = (y^ans)%n;
-        int l = min(p,q);
-        int r = max(p,q);
-        ans = sgt.query(pref[r+1],l,r);
-        cout<<ans<<endl;
-    }
-}
-signed main() {
-    fast_cin();
-#ifdef MYPC
-    freopen("input.in", "r", stdin);
-    //freopen("input.out","w",stdout);
-#else
-    string filename="";
-    if(!filename.empty()) {
-        freopen((filename+".in").c_str(), "r", stdin);
-        freopen((filename+".out").c_str(), "w", stdout);
-    }
-#endif
-    int t;
-    t=1;
-    while (t--) {
-        solve();
-    }
-    return 0;
-}
-
 

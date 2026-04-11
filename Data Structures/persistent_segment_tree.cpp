@@ -18,10 +18,10 @@ struct SegTree {
         int b = (r==nullptr) ? DEFAULT : r->val;
         return merge(a,b);
     }
-    node* build(vector<int> &arr){
+    node* build(const vector<int> &arr){
         return build(arr,0,sz);
     }
-    node* build(vector<int> &arr, int lx, int rx){
+    node* build(const vector<int> &arr, int lx, int rx){
         if(rx-lx==1) return new node( (lx <arr.size()) ? arr[lx] : DEFAULT);
         int m = (lx+rx)/2;
         return new node(build(arr,lx,m),build(arr,m,rx),nodeMerge);

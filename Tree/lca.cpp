@@ -72,4 +72,8 @@ struct TreeLCA {
         }
         return up[0][a];
     }
+    int dist(int a, int b){
+        int lc = lca(a,b);
+        return depth[a] + depth[b] - 2*depth[lca];
+    }
 };

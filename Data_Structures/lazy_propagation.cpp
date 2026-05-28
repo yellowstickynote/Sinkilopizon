@@ -4,14 +4,14 @@
  * Default configured for Range Add / Range Sum.
  */
 template <class T> struct LazySegTree {
-    const T ID = 0;
-    const T LAZY_ID = 0;
+    T ID = 0;
+    T LAZY_ID = 0;
     int n;
     vector<T> tree, lazy;
 
     T comb(T a, T b) { return a + b; }
 
-    LazySegTree(int n) : n(n), tree(4 * n, ID), lazy(4 * n, LAZY_ID) {}
+    LazySegTree(int _n) : n(_n), tree(4 * _n, ID), lazy(4 * _n, LAZY_ID) {}
     LazySegTree(const vector<T>& v) : n(v.size()), tree(4 * v.size(), ID), lazy(4 * v.size(), LAZY_ID) {
         build(v, 1, 0, n - 1);
     }

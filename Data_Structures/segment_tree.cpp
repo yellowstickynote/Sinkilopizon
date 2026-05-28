@@ -1,11 +1,11 @@
 template <class T> struct SegTree {
-    const T ID = 0; // Identity element
+    T ID = 0; 
     int n;
     vector<T> tree;
 
     T comb(T a, T b) { return a + b; }
 
-    SegTree(int n) : n(n), tree(4 * n, ID) {}
+    SegTree(int _n) : n(_n), tree(4 * _n, ID) {}
     SegTree(const vector<T>& v) : n(v.size()), tree(4 * v.size(), ID) {
         build(v, 1, 0, n - 1);
     }

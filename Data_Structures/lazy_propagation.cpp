@@ -10,8 +10,8 @@ template <class T> struct LazySegTree {
     T comb(T a, T b) { return a + b; }
 
     void apply(int i, T val) {
-        tree[i] = val * sz[i];
-        if (i < n) lazy[i] = val;
+        tree[i] += val * sz[i];
+        if (i < n) lazy[i] += val;
     }
 
     int n, h;

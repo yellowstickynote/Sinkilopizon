@@ -1,55 +1,44 @@
-template <class T> class SegmentTree {
-  private:
-	const T DEFAULT = 0;
+template <class T> struct SegTree {
+    const T ID = 0; // Identity element
+    int n;
+    vector<T> tree;
 
-	int len;
-	vector<T> segtree;
+    T comb(T a, T b) { return a + b; }
 
-	T combine(const T &a, const T &b) { return a + b; }
+    SegTree(int n) : n(n), tree(4 * n, ID) {}
+    SegTree(const vector<T>& v) : n(v.size()), tree(4 * v.size(), ID) {
+        build(v, 1, 0, n - 1);
+    }
 
-	void build(const vector<T> &arr, int at, int at_left, int at_right) {
-		if (at_left == at_right) {
-			segtree[at] = arr[at_left];
-			return;
-		}
-		int mid = (at_left + at_right) / 2;
-		build(arr, 2 * at, at_left, mid);
-		build(arr, 2 * at + 1, mid + 1, at_right);
-		segtree[at] = combine(segtree[2 * at], segtree[2 * at + 1]);
-	}
+    void build(const vector<T>& v, int node, int tl, int tr) {
+        if (tl == tr) {
+            tree[node] = v[tl];
+            return;
+        }
+        int tm = (tl + tr) / 2;
+        build(v, 2 * node, tl, tm);
+        build(v, 2 * node + 1, tm + 1, tr);
+        tree[node] = comb(tree[2 * node], tree[2 * node + 1]);
+    }
 
-	void set(int ind, T val, int at, int at_left, int at_right) {
-		if (at_left == at_right) {
-			segtree[at] = val;
-			return;
-		}
-		int mid = (at_left + at_right) / 2;
-		if (ind <= mid) {
-			set(ind, val, 2 * at, at_left, mid);
-		} else {
-			set(ind, val, 2 * at + 1, mid + 1, at_right);
-		}
-		segtree[at] = combine(segtree[2 * at], segtree[2 * at + 1]);
-	}
+    void upd(int pos, T val, int node, int tl, int tr) {
+        if (tl == tr) {
+            tree[node] = val;
+            return;
+        }
+        int tm = (tl + tr) / 2;
+        if (pos <= tm) upd(pos, val, 2 * node, tl, tm);
+        else upd(pos, val, 2 * node + 1, tm + 1, tr);
+        tree[node] = comb(tree[2 * node], tree[2 * node + 1]);
+    }
+    void upd(int pos, T val) { upd(pos, val, 1, 0, n - 1); }
 
-	T range_sum(int start, int end, int at, int at_left, int at_right) {
-		if (at_right < start || end < at_left) { return DEFAULT; }
-		if (start <= at_left && at_right <= end) { return segtree[at]; }
-		int mid = (at_left + at_right) / 2;
-		T left_res = range_sum(start, end, 2 * at, at_left, mid);
-		T right_res = range_sum(start, end, 2 * at + 1, mid + 1, at_right);
-		return combine(left_res, right_res);
-	}
-
-  public:
-	SegmentTree(int len) : len(len) { segtree = vector<T>(len * 4, DEFAULT); };
-
-	SegmentTree(const vector<T> &arr) : len(arr.size()) {
-		segtree = vector<T>(len * 4, DEFAULT);
-		build(arr, 1, 0, len - 1);
-	}
-
-	void set(int ind, T val) { set(ind, val, 1, 0, len - 1); }
-
-	T range_sum(int start, int end) { return range_sum(start, end, 1, 0, len - 1); }
+    T query(int l, int r, int node, int tl, int tr) {
+        if (l > tr || r < tl) return ID;
+        if (l <= tl && tr <= r) return tree[node];
+        int tm = (tl + tr) / 2;
+        return comb(query(l, r, 2 * node, tl, tm), 
+                    query(l, r, 2 * node + 1, tm + 1, tr));
+    }
+    T query(int l, int r) { return query(l, r, 1, 0, n - 1); }
 };

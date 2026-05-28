@@ -3,42 +3,35 @@ template <class T> struct SegTree {
     int n;
     vector<T> tree;
 
-    T comb(T a, T b) { return a + b; }
+    T comb(T a, T b) { return max(a, b); }
 
-    SegTree(int _n) : n(_n), tree(4 * _n, ID) {}
-    SegTree(const vector<T>& v) : n(v.size()), tree(4 * v.size(), ID) {
-        build(v, 1, 0, n - 1);
+    SegTree(int _n = 0) {
+        init(_n);
     }
 
-    void build(const vector<T>& v, int node, int tl, int tr) {
-        if (tl == tr) {
-            tree[node] = v[tl];
-            return;
+    SegTree(const vector<T>& v) {
+        init(v.size());
+        for (int i = 0; i < n; i++) tree[n + i] = v[i];
+        for (int i = n - 1; i > 0; --i) tree[i] = comb(tree[2 * i], tree[2 * i + 1]);
+    }
+
+    void init(int _n) {
+        n = _n;
+        tree.assign(2 * n, ID);
+    }
+
+    void upd(int pos, T val) {
+        for (tree[pos += n] = val; pos > 1; pos >>= 1) {
+            tree[pos >> 1] = comb(tree[pos], tree[pos ^ 1]);
         }
-        int tm = (tl + tr) / 2;
-        build(v, 2 * node, tl, tm);
-        build(v, 2 * node + 1, tm + 1, tr);
-        tree[node] = comb(tree[2 * node], tree[2 * node + 1]);
     }
 
-    void upd(int pos, T val, int node, int tl, int tr) {
-        if (tl == tr) {
-            tree[node] = val;
-            return;
+    T query(int l, int r) {
+        T res = ID;
+        for (l += n, r += n + 1; l < r; l >>= 1, r >>= 1) {
+            if (l & 1) res = comb(res, tree[l++]);
+            if (r & 1) res = comb(res, tree[--r]);
         }
-        int tm = (tl + tr) / 2;
-        if (pos <= tm) upd(pos, val, 2 * node, tl, tm);
-        else upd(pos, val, 2 * node + 1, tm + 1, tr);
-        tree[node] = comb(tree[2 * node], tree[2 * node + 1]);
+        return res;
     }
-    void upd(int pos, T val) { upd(pos, val, 1, 0, n - 1); }
-
-    T query(int l, int r, int node, int tl, int tr) {
-        if (l > tr || r < tl) return ID;
-        if (l <= tl && tr <= r) return tree[node];
-        int tm = (tl + tr) / 2;
-        return comb(query(l, r, 2 * node, tl, tm), 
-                    query(l, r, 2 * node + 1, tm + 1, tr));
-    }
-    T query(int l, int r) { return query(l, r, 1, 0, n - 1); }
 };

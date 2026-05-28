@@ -61,8 +61,14 @@ template <class T> struct LazySegTree {
             if (r & 1) apply(--r, val);
         }
 
-        for (l0 >>= 1; l0 > 0; l0 >>= 1) tree[l0] = comb(tree[2 * l0], tree[2 * l0 + 1]);
-        for (r0 >>= 1; r0 > 0; r0 >>= 1) tree[r0] = comb(tree[2 * r0], tree[2 * r0 + 1]);
+        for (l0 >>= 1; l0 > 0; l0 >>= 1) {
+            tree[l0] = comb(tree[2 * l0], tree[2 * l0 + 1]);
+            if (lazy[l0] != LAZY_ID) tree[l0] += lazy[l0] * sz[l0];
+        }
+        for (r0 >>= 1; r0 > 0; r0 >>= 1) {
+            tree[r0] = comb(tree[2 * r0], tree[2 * r0 + 1]);
+            if (lazy[r0] != LAZY_ID) tree[r0] += lazy[r0] * sz[r0];
+        }
     }
 
     T query(int l, int r) {

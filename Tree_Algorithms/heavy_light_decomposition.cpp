@@ -98,28 +98,8 @@ template <class ST, class T> struct TreeHLD {
         tree.upd(pos[u], val);
     }
 
-    void upd_path(int u, int v, T val) {
-        while (head[u] != head[v]) {
-            if (depth[head[u]] > depth[head[v]]) {
-                tree.upd(pos[head[u]], pos[u], val);
-                u = parent[head[u]];
-            } else {
-                tree.upd(pos[head[v]], pos[v], val);
-                v = parent[head[v]];
-            }
-        }
-        if (depth[u] > depth[v]) tree.upd(pos[v], pos[u], val);
-        else tree.upd(pos[u], pos[v], val);
-    }
-
-    void upd_subtree(int u, T val) {
-        tree.upd(pos[u], pos[u] + sz[u] - 1, val);
-    }
-
     T query_path(int u, int v) {
-        T res_u = tree.ID;
-        T res_v = tree.ID;
-        
+        T res_u = tree.ID, res_v = tree.ID;
         while (head[u] != head[v]) {
             if (depth[head[u]] > depth[head[v]]) {
                 res_u = tree.comb(res_u, tree.query_rev(pos[head[u]], pos[u]));
@@ -129,13 +109,11 @@ template <class ST, class T> struct TreeHLD {
                 v = parent[head[v]];
             }
         }
-        
         if (depth[u] >= depth[v]) {
             res_u = tree.comb(res_u, tree.query_rev(pos[v], pos[u]));
         } else {
             res_v = tree.comb(tree.query(pos[u], pos[v]), res_v);
         }
-        
         return tree.comb(res_u, res_v);
     }
 

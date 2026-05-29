@@ -1,6 +1,7 @@
 #ifndef DEBUG_TEMPLATE_CPP
 #define DEBUG_TEMPLATE_CPP
 #include <bits/stdc++.h>
+template <int MOD> struct ModInt;
 // #define cerr cout
 namespace __DEBUG_UTIL__
 {

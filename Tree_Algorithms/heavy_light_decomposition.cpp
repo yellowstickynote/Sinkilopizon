@@ -1,15 +1,16 @@
-// requires lowest_common_ancestor.cpp and a segment tree 
+// Heavy-Light Decomposition (Non-Commutative Compatible)
+// requires lowest_common_ancestor.cpp and a non-commutative segment tree 
 // TreeHLD<SegTree<T>, T> H(n); -> Initialize 1-indexed HLD with n nodes
-// TreeHLD<LazySegTree<T>, T> H(n); -> Initialize with Lazy Segment Tree
-// H.add_edge(u, v); -> Add bidirectional/undirected edge between u and v
-// H.build(root); -> Build HLD with an empty segment tree (default root = 1)
-// H.build(vals, root); -> Build HLD and initialize segment tree with 1-indexed node values
-// H.upd_node(u, val); -> Point update for standard SegTree
-// H.upd_path(u, v, val); -> Range update on path for LazySegTree
-// H.upd_subtree(u, val); -> Range update on subtree for LazySegTree
-// H.query_path(u, v); -> Query aggregate value along path between u and v
+// H.add_edge(u, v); -> Add bidirectional edge between u and v
+// H.build(root); -> Build HLD (default root = 1)
+// H.build(vals, root); -> Build HLD and initialize segment tree with values
+// H.upd_node(u, val); -> Point update
+// H.upd_path(u, v, val); -> Range update on path
+// H.upd_subtree(u, val); -> Range update on subtree
+// H.query_path(u, v); -> Query aggregate value along path from u to v strictly respecting order
 // H.query_subtree(u); -> Query aggregate value of subtree of u
-// H.lca(u, v); -> Find Lowest Common Ancestor of u and v in O(log n)
+// H.lca(u, v); -> Find Lowest Common Ancestor
+
 template <class ST, class T> struct TreeHLD {
     int n, cur_pos;
     vector<vector<int>> g;
@@ -56,13 +57,9 @@ template <class ST, class T> struct TreeHLD {
     void dfs_hld(int v, int h) {
         head[v] = h;
         pos[v] = cur_pos++;
-        if (heavy[v] != -1) {
-            dfs_hld(heavy[v], h);
-        }
+        if (heavy[v] != -1) dfs_hld(heavy[v], h);
         for (int to : g[v]) {
-            if (to != parent[v] && to != heavy[v]) {
-                dfs_hld(to, to);
-            }
+            if (to != parent[v] && to != heavy[v]) dfs_hld(to, to);
         }
     }
 
@@ -70,13 +67,9 @@ template <class ST, class T> struct TreeHLD {
         head[v] = h;
         pos[v] = cur_pos++;
         linear_vals[pos[v]] = vals[v];
-        if (heavy[v] != -1) {
-            dfs_hld(heavy[v], h, vals, linear_vals);
-        }
+        if (heavy[v] != -1) dfs_hld(heavy[v], h, vals, linear_vals);
         for (int to : g[v]) {
-            if (to != parent[v] && to != heavy[v]) {
-                dfs_hld(to, to, vals, linear_vals);
-            }
+            if (to != parent[v] && to != heavy[v]) dfs_hld(to, to, vals, linear_vals);
         }
     }
 
@@ -107,12 +100,16 @@ template <class ST, class T> struct TreeHLD {
 
     void upd_path(int u, int v, T val) {
         while (head[u] != head[v]) {
-            if (depth[head[u]] > depth[head[v]]) swap(u, v);
-            tree.upd(pos[head[v]], pos[v], val);
-            v = parent[head[v]];
+            if (depth[head[u]] > depth[head[v]]) {
+                tree.upd(pos[head[u]], pos[u], val);
+                u = parent[head[u]];
+            } else {
+                tree.upd(pos[head[v]], pos[v], val);
+                v = parent[head[v]];
+            }
         }
-        if (depth[u] > depth[v]) swap(u, v);
-        tree.upd(pos[u], pos[v], val);
+        if (depth[u] > depth[v]) tree.upd(pos[v], pos[u], val);
+        else tree.upd(pos[u], pos[v], val);
     }
 
     void upd_subtree(int u, T val) {
@@ -120,15 +117,26 @@ template <class ST, class T> struct TreeHLD {
     }
 
     T query_path(int u, int v) {
-        T res = tree.ID;
+        T res_u = tree.ID;
+        T res_v = tree.ID;
+        
         while (head[u] != head[v]) {
-            if (depth[head[u]] > depth[head[v]]) swap(u, v);
-            res = tree.comb(res, tree.query(pos[head[v]], pos[v]));
-            v = parent[head[v]];
+            if (depth[head[u]] > depth[head[v]]) {
+                res_u = tree.comb(res_u, tree.query_rev(pos[head[u]], pos[u]));
+                u = parent[head[u]];
+            } else {
+                res_v = tree.comb(tree.query(pos[head[v]], pos[v]), res_v);
+                v = parent[head[v]];
+            }
         }
-        if (depth[u] > depth[v]) swap(u, v);
-        res = tree.comb(res, tree.query(pos[u], pos[v]));
-        return res;
+        
+        if (depth[u] >= depth[v]) {
+            res_u = tree.comb(res_u, tree.query_rev(pos[v], pos[u]));
+        } else {
+            res_v = tree.comb(tree.query(pos[u], pos[v]), res_v);
+        }
+        
+        return tree.comb(res_u, res_v);
     }
 
     T query_subtree(int u) {

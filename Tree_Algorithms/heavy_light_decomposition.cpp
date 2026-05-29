@@ -1,5 +1,5 @@
 // Heavy-Light Decomposition (Non-Commutative Compatible)
-// requires lowest_common_ancestor.cpp and a non-commutative segment tree 
+//requires a non-commutative segment tree 
 // TreeHLD<SegTree<T>, T> H(n); -> Initialize 1-indexed HLD with n nodes
 // H.add_edge(u, v); -> Add bidirectional edge between u and v
 // H.build(root); -> Build HLD (default root = 1)

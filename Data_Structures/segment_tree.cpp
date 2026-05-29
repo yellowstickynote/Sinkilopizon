@@ -52,7 +52,7 @@ template <class T> struct SegTree {
         T resL = ID, resR = ID;
         for (l += n, r += n + 1; l < r; l >>= 1, r >>= 1) {
             if (l & 1) resL = comb(tree_rev[l++], resL);
-            if (r & 1) resR = comb(resR, tree[--r]);
+            if (r & 1) resR = comb(resR, tree_rev[--r]);
         }
         return comb(resR, resL);
     }

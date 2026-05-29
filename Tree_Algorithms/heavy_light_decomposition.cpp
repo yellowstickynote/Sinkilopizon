@@ -1,3 +1,4 @@
+// requires lowest_common_ancestor.cpp and a segment tree 
 // TreeHLD<SegTree<T>, T> H(n); -> Initialize 1-indexed HLD with n nodes
 // TreeHLD<LazySegTree<T>, T> H(n); -> Initialize with Lazy Segment Tree
 // H.add_edge(u, v); -> Add bidirectional/undirected edge between u and v

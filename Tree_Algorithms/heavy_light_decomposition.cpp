@@ -98,6 +98,10 @@ template <class ST, class T> struct TreeHLD {
         tree.upd(pos[u], val);
     }
 
+	void upd_path(int u, int v, T val){
+		tree.upd(pos[u], pos[v], val);
+	}
+
     T query_path(int u, int v) {
         T res_u = tree.ID, res_v = tree.ID;
         while (head[u] != head[v]) {

@@ -14,8 +14,11 @@ template <class T> struct SegTree {
     SegTree(const vector<T>& v) {
         init(v.size());
         for (int i = 0; i < n; i++) {
-            tree[n + i] = v[i];
-            tree_rev[n + i] = v[i];
+			if(i<n)
+            {
+				tree[n + i] = v[i];
+				tree_rev[n + i] = v[i]; 
+			}
         }
         for (int i = n - 1; i > 0; --i) {
             tree[i] = comb(tree[2 * i], tree[2 * i + 1]);
@@ -24,7 +27,9 @@ template <class T> struct SegTree {
     }
 
     void init(int _n) {
-        n = _n;
+		int k = 1;
+		while(k<_n) k*=2;
+		n = k;
         tree.assign(2 * n, ID);
         tree_rev.assign(2 * n, ID);
     }

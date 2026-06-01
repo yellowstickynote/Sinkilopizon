@@ -100,4 +100,8 @@ template <class T, class U = T> struct LazySegTree {
         }
         return res;
     }
+
+	T query_rev(int l, int r){
+		return query(l,r);
+	}
 };

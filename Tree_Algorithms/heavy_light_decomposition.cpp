@@ -1,17 +1,19 @@
-// Heavy-Light Decomposition (Non-Commutative Compatible)
-//requires a non-commutative segment tree 
-// TreeHLD<SegTree<T>, T> H(n); -> Initialize 1-indexed HLD with n nodes
-// H.add_edge(u, v); -> Add bidirectional edge between u and v
-// H.build(root); -> Build HLD (default root = 1)
-// H.build(vals, root); -> Build HLD and initialize segment tree with values
-// H.upd_node(u, val); -> Point update
-// H.upd_path(u, v, val); -> Range update on path
-// H.upd_subtree(u, val); -> Range update on subtree
-// H.query_path(u, v); -> Query aggregate value along path from u to v strictly respecting order
-// H.query_subtree(u); -> Query aggregate value of subtree of u
-// H.lca(u, v); -> Find Lowest Common Ancestor
+// Heavy-Light Decomposition (non-commutative compatible)
+// Needs a lazy segment tree ST<T,U> exposing: ID, comb, query, query_rev, upd.
+// Path queries respect endpoint order; lazy/comb must compose order-correctly.
+//
+// TreeHLD<ST<T,U>, T, U> H(n);   1-indexed, n nodes (U defaults to T)
+// H.add_edge(u, v)               undirected edge
+// H.build(root)                  build (default root = 1)
+// H.build(vals, root)            build + seed values
+// H.upd_node(u, val)             point update
+// H.upd_path(u, v, val)          range update along path u..v
+// H.upd_subtree(u, val)          range update on subtree of u
+// H.query_path(u, v)             ordered aggregate along path u -> v
+// H.query_subtree(u)             aggregate over subtree of u
+// H.lca(u, v)                    lowest common ancestor
 
-template <class ST, class T> struct TreeHLD {
+template <class ST, class T, class U = T> struct TreeHLD {
     int n, cur_pos;
     vector<vector<int>> g;
     vector<int> parent, depth, heavy, head, pos, sz;
@@ -94,13 +96,27 @@ template <class ST, class T> struct TreeHLD {
         return (depth[u] < depth[v] ? u : v);
     }
 
-    void upd_node(int u, T val) {
-        tree.upd(pos[u], val);
+    void upd_node(int u, U val) {
+        tree.upd(pos[u], pos[u], val);
     }
 
-	void upd_path(int u, int v, T val){
-		tree.upd(pos[u], pos[v], val);
-	}
+    void upd_path(int u, int v, U val) {
+        while (head[u] != head[v]) {
+            if (depth[head[u]] > depth[head[v]]) {
+                tree.upd(pos[head[u]], pos[u], val);
+                u = parent[head[u]];
+            } else {
+                tree.upd(pos[head[v]], pos[v], val);
+                v = parent[head[v]];
+            }
+        }
+        if (pos[u] <= pos[v]) tree.upd(pos[u], pos[v], val);
+        else                  tree.upd(pos[v], pos[u], val);
+    }
+
+    void upd_subtree(int u, U val) {
+        tree.upd(pos[u], pos[u] + sz[u] - 1, val);
+    }
 
     T query_path(int u, int v) {
         T res_u = tree.ID, res_v = tree.ID;

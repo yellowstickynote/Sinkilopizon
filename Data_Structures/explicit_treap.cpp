@@ -7,8 +7,8 @@
  * Instantiate ONCE as Treap<K>, Treap<K,T>, or Treap<K,T,U>; it owns all trees of
  * that type. A tree is a root index you track yourself; init() hands you an empty one.
  *
- * Every op takes the root by reference and is void (reads return via an out-param),
- * so a root that shifts is written back automatically. Ranges are CLOSED [lo,hi].
+ * Mutators take the root by reference and are void, so a root that shifts is written
+ * back automatically. Pure reads return their result. Ranges are CLOSED [lo,hi].
  * Cut-and-paste across any roots with the split/merge primitives below.
  *
  *   init()              : return a fresh empty tree (== 0).
@@ -16,8 +16,9 @@
  *                         eq=true -> {<=k}|{>k}.
  *   merge(a,b,c)        : join subtrees (all keys in a < all keys in b); result -> c.
  *   insert(r,k,v)       : add key k (no-op if present).   erase(r,k) : remove key k.
- *   contains(r,k,res) / order_of_key(r,k,res) / kth(r,i,res) : reads via res.
- *   upd(r,lo,hi,tag) / query(r,lo,hi,res) : apply / aggregate over [lo,hi].
+ *   upd(r,lo,hi,tag)    : apply tag over [lo,hi].
+ *   query(r,lo,hi)      : aggregate over [lo,hi].          contains(r,k) : membership.
+ *   order_of_key(r,k)   : number of keys < k.              kth(r,i) : key at rank i.
  *
  * Internals keep the invariant push(x) before descent, calc(x) after a child changes.
  */
@@ -79,27 +80,27 @@ template <class K, class T = K, class U = T> struct Treap {
         int a, mid, b; split(r, k, a, b, false); split(b, k, mid, b, true);
         merge(a, b, r);
     }
-    void contains(int& r, K k, bool& res) {
+    bool contains(int& r, K k) {
         int a, mid, b; split(r, k, a, b, false); split(b, k, mid, b, true);
-        res = mid; merge(mid, b, mid); merge(a, mid, r);
+        bool res = mid; merge(mid, b, mid); merge(a, mid, r); return res;
     }
     void upd(int& r, K lo, K hi, U v) {
         int a, b, c; split(r, lo, a, b, false); split(b, hi, b, c, true);
         apply(b, v); merge(b, c, b); merge(a, b, r);
     }
-    void query(int& r, K lo, K hi, T& res) {
+    T query(int& r, K lo, K hi) {
         int a, b, c; split(r, lo, a, b, false); split(b, hi, b, c, true);
-        res = t[b].agg; merge(b, c, b); merge(a, b, r);
+        T res = t[b].agg; merge(b, c, b); merge(a, b, r); return res;
     }
-    void order_of_key(int& r, K k, int& res) {
-        int a, b; split(r, k, a, b, false); res = sz(a); merge(a, b, r);
+    int order_of_key(int& r, K k) {
+        int a, b; split(r, k, a, b, false); int res = sz(a); merge(a, b, r); return res;
     }
-    void kth(int& r, int i, K& res) {
+    K kth(int& r, int i) {
         int x = r;
         while (x) {
-            if (sz(t[x].l) == i) { res = t[x].key; return; }
+            if (sz(t[x].l) == i) return t[x].key;
             if (i < sz(t[x].l)) x = t[x].l; else { i -= sz(t[x].l) + 1; x = t[x].r; }
         }
-        res = K{};
+        return K{};
     }
 };

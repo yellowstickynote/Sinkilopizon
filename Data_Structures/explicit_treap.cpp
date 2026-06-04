@@ -9,12 +9,16 @@
  *
  * Mutators take the root by reference and are void, so a root that shifts is written
  * back automatically. Pure reads return their result. Ranges are CLOSED [lo,hi].
- * Cut-and-paste across any roots with the split/merge primitives below.
  *
  *   init()              : return a fresh empty tree (== 0).
  *   split(x,k,a,b,eq)   : cut x by key; a,b get the two sides. eq=false -> {<k}|{>=k},
  *                         eq=true -> {<=k}|{>k}.
- *   merge(a,b,c)        : join subtrees (all keys in a < all keys in b); result -> c.
+ *   merge(a,b,c)        : CONCATENATE ordered disjoint subtrees (all keys in a < all
+ *                         keys in b); result -> c. Use for split-then-rejoin.
+ *   unite(a,b,c)        : key-set UNION of two arbitrary trees, O(M log(N/M)); result
+ *                         -> c. On a shared key keeps a's node. Inputs are consumed.
+ *   intersect(a,b,c)    : key-set INTERSECTION (keys in both), O(M log(N/M)); result
+ *                         -> c, nodes taken from a. Inputs are consumed.
  *   insert(r,k,v)       : add key k (no-op if present).   erase(r,k) : remove key k.
  *   upd(r,lo,hi,tag)    : apply tag over [lo,hi].
  *   query(r,lo,hi)      : aggregate over [lo,hi].          contains(r,k) : membership.
@@ -70,6 +74,23 @@ template <class K, class T = K, class U = T> struct Treap {
         if (!a || !b) { c = a | b; return; }
         if (t[a].pri > t[b].pri) { push(a); merge(t[a].r, b, t[a].r); calc(a); c = a; }
         else { push(b); merge(a, t[b].l, t[b].l); calc(b); c = b; }
+    }
+    void unite(int a, int b, int& c) {
+        if (!a || !b) { c = a | b; return; }
+        if (t[a].pri < t[b].pri) swap(a, b);
+        push(a);
+        int l, r, dup; split(b, t[a].key, l, b, false); split(b, t[a].key, dup, r, true);
+        unite(t[a].l, l, t[a].l); unite(t[a].r, r, t[a].r);
+        calc(a); c = a;
+    }
+    void intersect(int a, int b, int& c) {
+        if (!a || !b) { c = 0; return; }
+        if (t[a].pri < t[b].pri) swap(a, b);
+        push(a);
+        int l, r, dup; split(b, t[a].key, l, b, false); split(b, t[a].key, dup, r, true);
+        int lc, rc; intersect(t[a].l, l, lc); intersect(t[a].r, r, rc);
+        if (dup) { t[a].l = lc; t[a].r = rc; calc(a); c = a; }
+        else merge(lc, rc, c);
     }
     void insert(int& r, K k, T v) {
         int a, mid, b; split(r, k, a, b, false); split(b, k, mid, b, true);

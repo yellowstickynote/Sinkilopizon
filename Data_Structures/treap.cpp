@@ -1,0 +1,77 @@
+/**
+ * Implicit Treap (Lazy Propagation, Dual-Type Configuration)
+ * * T: Data type of the tree nodes (e.g. int sum, struct for matrix/min-max)
+ * * U: Data type of the lazy tags (e.g. int for range-add, struct for affine mx+b)
+ * Default: T and U are the same type. To separate, instantiate as Treap<T, U>.
+ * Indices are 0-based positions. Operations: insert, erase, upd(l,r), query(l,r),
+ * reverse(l,r), and indexing. Only edit the Customization Section at the top.
+ */
+template <class T, class U = T> struct Treap {
+    T ID = 0;
+    U LAZY_ID = 0;
+    T comb(T a, T b) {
+        return a + b;
+    }
+    T apply_val(T node_agg, U lazy_val, int node_sz) {
+        return node_agg + lazy_val * node_sz;
+    }
+    U combine_lazy(U old_lazy, U new_lazy) {
+        return old_lazy + new_lazy;
+    }
+    struct Node {
+        int l = 0, r = 0, sz = 1, pri;
+        bool rev = false;
+        T val, agg;
+        U lazy;
+    };
+    vector<Node> t;
+    int root = 0;
+    mt19937 rng{random_device{}()};
+    Treap() { t.push_back({0, 0, 0, 0, false, ID, ID, LAZY_ID}); }
+    Treap(const vector<T>& v) : Treap() { for (T x : v) push_back(x); }
+    int sz(int x) { return t[x].sz; }
+    int make(T v) { t.push_back({0, 0, 1, (int)rng(), false, v, v, LAZY_ID}); return t.size() - 1; }
+    void apply(int x, U v) {
+        if (!x) return;
+        t[x].val = apply_val(t[x].val, v, 1);
+        t[x].agg = apply_val(t[x].agg, v, t[x].sz);
+        t[x].lazy = combine_lazy(t[x].lazy, v);
+    }
+    void flip(int x) { if (x) { swap(t[x].l, t[x].r); t[x].rev ^= 1; } }
+    void push(int x) {
+        if (t[x].lazy != LAZY_ID) { apply(t[x].l, t[x].lazy); apply(t[x].r, t[x].lazy); t[x].lazy = LAZY_ID; }
+        if (t[x].rev) { flip(t[x].l); flip(t[x].r); t[x].rev = false; }
+    }
+    void calc(int x) {
+        t[x].sz = 1 + sz(t[x].l) + sz(t[x].r);
+        t[x].agg = comb(comb(t[t[x].l].agg, t[x].val), t[t[x].r].agg);
+    }
+    void split(int x, int k, int& a, int& b) {
+        if (!x) { a = b = 0; return; }
+        push(x);
+        if (sz(t[x].l) < k) { a = x; split(t[x].r, k - sz(t[x].l) - 1, t[x].r, b); }
+        else { b = x; split(t[x].l, k, a, t[x].l); }
+        calc(x);
+    }
+    int merge(int a, int b) {
+        if (!a || !b) return a | b;
+        if (t[a].pri > t[b].pri) { push(a); t[a].r = merge(t[a].r, b); calc(a); return a; }
+        push(b); t[b].l = merge(a, t[b].l); calc(b); return b;
+    }
+    void insert(int i, T v) { int a, b; split(root, i, a, b); root = merge(merge(a, make(v)), b); }
+    void push_back(T v) { insert(sz(root), v); }
+    void erase(int i) { int a, b, c; split(root, i, a, b); split(b, 1, b, c); root = merge(a, c); }
+    void upd(int l, int r, U v) {
+        int a, b, c; split(root, l, a, b); split(b, r - l + 1, b, c);
+        apply(b, v); root = merge(merge(a, b), c);
+    }
+    T query(int l, int r) {
+        int a, b, c; split(root, l, a, b); split(b, r - l + 1, b, c);
+        T res = t[b].agg; root = merge(merge(a, b), c); return res;
+    }
+    void reverse(int l, int r) {
+        int a, b, c; split(root, l, a, b); split(b, r - l + 1, b, c);
+        flip(b); root = merge(merge(a, b), c);
+    }
+    T operator[](int i) { return query(i, i); }
+};

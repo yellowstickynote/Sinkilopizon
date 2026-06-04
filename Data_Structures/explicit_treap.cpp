@@ -9,13 +9,13 @@
  *
  * Every op takes the root by reference and is void (reads return via an out-param),
  * so a root that shifts is written back automatically. Ranges are CLOSED [lo,hi].
- * Cut-and-paste across any roots with split/merge (merge is void: it writes the
- * result into its first argument, so chain calls rather than nesting them).
+ * Cut-and-paste across any roots with the split/merge primitives below.
  *
- *   init()            : return a fresh empty tree (== 0).
- *   split(x,k,a,b,eq) : cut x by key into a,b. eq=false -> {<k}|{>=k}, eq=true -> {<=k}|{>k}.
- *   merge(a,b)        : join subtrees (all keys in a < all keys in b) into a.
- *   insert(r,k,v)     : add key k (no-op if present).   erase(r,k) : remove key k.
+ *   init()              : return a fresh empty tree (== 0).
+ *   split(x,k,a,b,eq)   : cut x by key; a,b get the two sides. eq=false -> {<k}|{>=k},
+ *                         eq=true -> {<=k}|{>k}.
+ *   merge(a,b,c)        : join subtrees (all keys in a < all keys in b); result -> c.
+ *   insert(r,k,v)       : add key k (no-op if present).   erase(r,k) : remove key k.
  *   contains(r,k,res) / order_of_key(r,k,res) / kth(r,i,res) : reads via res.
  *   upd(r,lo,hi,tag) / query(r,lo,hi,res) : apply / aggregate over [lo,hi].
  *
@@ -65,34 +65,34 @@ template <class K, class T = K, class U = T> struct Treap {
         else { b = x; split(t[x].l, k, a, t[x].l, eq); }
         calc(x);
     }
-    void merge(int& a, int b) {
-        if (!a || !b) { a |= b; return; }
-        if (t[a].pri > t[b].pri) { push(a); merge(t[a].r, b); calc(a); }
-        else { push(b); merge(a, t[b].l); t[b].l = a; calc(b); a = b; }
+    void merge(int a, int b, int& c) {
+        if (!a || !b) { c = a | b; return; }
+        if (t[a].pri > t[b].pri) { push(a); merge(t[a].r, b, t[a].r); calc(a); c = a; }
+        else { push(b); merge(a, t[b].l, t[b].l); calc(b); c = b; }
     }
     void insert(int& r, K k, T v) {
         int a, mid, b; split(r, k, a, b, false); split(b, k, mid, b, true);
         if (!mid) mid = make(k, v);
-        merge(mid, b); merge(a, mid); r = a;
+        merge(mid, b, mid); merge(a, mid, r);
     }
     void erase(int& r, K k) {
         int a, mid, b; split(r, k, a, b, false); split(b, k, mid, b, true);
-        merge(a, b); r = a;
+        merge(a, b, r);
     }
     void contains(int& r, K k, bool& res) {
         int a, mid, b; split(r, k, a, b, false); split(b, k, mid, b, true);
-        res = mid; merge(mid, b); merge(a, mid); r = a;
+        res = mid; merge(mid, b, mid); merge(a, mid, r);
     }
     void upd(int& r, K lo, K hi, U v) {
         int a, b, c; split(r, lo, a, b, false); split(b, hi, b, c, true);
-        apply(b, v); merge(b, c); merge(a, b); r = a;
+        apply(b, v); merge(b, c, b); merge(a, b, r);
     }
     void query(int& r, K lo, K hi, T& res) {
         int a, b, c; split(r, lo, a, b, false); split(b, hi, b, c, true);
-        res = t[b].agg; merge(b, c); merge(a, b); r = a;
+        res = t[b].agg; merge(b, c, b); merge(a, b, r);
     }
     void order_of_key(int& r, K k, int& res) {
-        int a, b; split(r, k, a, b, false); res = sz(a); merge(a, b); r = a;
+        int a, b; split(r, k, a, b, false); res = sz(a); merge(a, b, r);
     }
     void kth(int& r, int i, K& res) {
         int x = r;

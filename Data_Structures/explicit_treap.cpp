@@ -5,18 +5,19 @@
  *   T : value/aggregate type (e.g. int sum, struct for min/max).
  *   U : lazy-tag type over key ranges (e.g. int range-add, affine struct).
  * Instantiate ONCE as Treap<K>, Treap<K,T>, or Treap<K,T,U>; it owns all trees of
- * that type. A tree is a root index you track yourself; 0 is the empty tree.
+ * that type. A tree is a root index you track yourself; init() hands you an empty one.
  *
  * Every op takes the root by reference and is void (reads return via an out-param),
- * so a root that shifts is written back automatically. Ranges are HALF-OPEN [lo,hi).
- * Cut-and-paste across any roots with the split/merge primitives (note: void merge
- * writes the result into its first argument, so chain calls instead of nesting).
+ * so a root that shifts is written back automatically. Ranges are CLOSED [lo,hi].
+ * Cut-and-paste across any roots with split/merge (merge is void: it writes the
+ * result into its first argument, so chain calls rather than nesting them).
  *
- *   split(x,k,a,b) : cut x by key into a={<k}, b={>=k} (empty side = 0).
- *   merge(a,b)     : join subtrees (all keys in a < all keys in b) into a.
- *   insert(r,k,v)  : add key k (no-op if present).      erase(r,k) : remove key k.
+ *   init()            : return a fresh empty tree (== 0).
+ *   split(x,k,a,b,eq) : cut x by key into a,b. eq=false -> {<k}|{>=k}, eq=true -> {<=k}|{>k}.
+ *   merge(a,b)        : join subtrees (all keys in a < all keys in b) into a.
+ *   insert(r,k,v)     : add key k (no-op if present).   erase(r,k) : remove key k.
  *   contains(r,k,res) / order_of_key(r,k,res) / kth(r,i,res) : reads via res.
- *   upd(r,lo,hi,tag) / query(r,lo,hi,res) : apply / aggregate over [lo,hi).
+ *   upd(r,lo,hi,tag) / query(r,lo,hi,res) : apply / aggregate over [lo,hi].
  *
  * Internals keep the invariant push(x) before descent, calc(x) after a child changes.
  */
@@ -41,6 +42,7 @@ template <class K, class T = K, class U = T> struct Treap {
     vector<Node> t;
     mt19937 rng{random_device{}()};
     Treap() { t.push_back({0, 0, 0, 0, K{}, ID, ID, LAZY_ID}); }
+    int init() { return 0; }
     int sz(int x) { return t[x].sz; }
     int make(K k, T v) { t.push_back({0, 0, 1, (int)rng(), k, v, v, LAZY_ID}); return t.size() - 1; }
     void apply(int x, U v) {
@@ -56,11 +58,11 @@ template <class K, class T = K, class U = T> struct Treap {
         t[x].sz = 1 + sz(t[x].l) + sz(t[x].r);
         t[x].agg = comb(comb(t[t[x].l].agg, t[x].val), t[t[x].r].agg);
     }
-    void split(int x, K k, int& a, int& b) {
+    void split(int x, K k, int& a, int& b, bool eq) {
         if (!x) { a = b = 0; return; }
         push(x);
-        if (t[x].key < k) { a = x; split(t[x].r, k, t[x].r, b); }
-        else { b = x; split(t[x].l, k, a, t[x].l); }
+        if (eq ? !(k < t[x].key) : t[x].key < k) { a = x; split(t[x].r, k, t[x].r, b, eq); }
+        else { b = x; split(t[x].l, k, a, t[x].l, eq); }
         calc(x);
     }
     void merge(int& a, int b) {
@@ -68,39 +70,29 @@ template <class K, class T = K, class U = T> struct Treap {
         if (t[a].pri > t[b].pri) { push(a); merge(t[a].r, b); calc(a); }
         else { push(b); merge(a, t[b].l); t[b].l = a; calc(b); a = b; }
     }
-    int popmin(int x) {
-        push(x);
-        if (!t[x].l) return t[x].r;
-        t[x].l = popmin(t[x].l); calc(x); return x;
-    }
     void insert(int& r, K k, T v) {
-        int a, b; split(r, k, a, b);
-        int m = b; while (t[m].l) m = t[m].l;
-        if (!(m && t[m].key == k)) { int nn = make(k, v); merge(a, nn); }
-        merge(a, b); r = a;
+        int a, mid, b; split(r, k, a, b, false); split(b, k, mid, b, true);
+        if (!mid) mid = make(k, v);
+        merge(mid, b); merge(a, mid); r = a;
     }
     void erase(int& r, K k) {
-        int a, b; split(r, k, a, b);
-        int m = b; while (t[m].l) m = t[m].l;
-        if (m && t[m].key == k) b = popmin(b);
+        int a, mid, b; split(r, k, a, b, false); split(b, k, mid, b, true);
         merge(a, b); r = a;
     }
     void contains(int& r, K k, bool& res) {
-        int a, b; split(r, k, a, b);
-        int m = b; while (t[m].l) m = t[m].l;
-        res = m && t[m].key == k;
-        merge(a, b); r = a;
+        int a, mid, b; split(r, k, a, b, false); split(b, k, mid, b, true);
+        res = mid; merge(mid, b); merge(a, mid); r = a;
     }
     void upd(int& r, K lo, K hi, U v) {
-        int a, b, c; split(r, lo, a, b); split(b, hi, b, c);
+        int a, b, c; split(r, lo, a, b, false); split(b, hi, b, c, true);
         apply(b, v); merge(b, c); merge(a, b); r = a;
     }
     void query(int& r, K lo, K hi, T& res) {
-        int a, b, c; split(r, lo, a, b); split(b, hi, b, c);
+        int a, b, c; split(r, lo, a, b, false); split(b, hi, b, c, true);
         res = t[b].agg; merge(b, c); merge(a, b); r = a;
     }
     void order_of_key(int& r, K k, int& res) {
-        int a, b; split(r, k, a, b); res = sz(a); merge(a, b); r = a;
+        int a, b; split(r, k, a, b, false); res = sz(a); merge(a, b); r = a;
     }
     void kth(int& r, int i, K& res) {
         int x = r;

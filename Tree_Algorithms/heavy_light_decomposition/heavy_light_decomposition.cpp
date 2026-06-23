@@ -1,18 +1,3 @@
-// Heavy-Light Decomposition (non-commutative compatible)
-// Needs a lazy segment tree ST<T,U> exposing: ID, comb, query, query_rev, upd.
-// Path queries respect endpoint order; lazy/comb must compose order-correctly.
-//
-// TreeHLD<ST<T,U>, T, U> H(n);   1-indexed, n nodes (U defaults to T)
-// H.add_edge(u, v)               undirected edge
-// H.build(root)                  build (default root = 1)
-// H.build(vals, root)            build + seed values
-// H.upd_node(u, val)             point update
-// H.upd_path(u, v, val)          range update along path u..v
-// H.upd_subtree(u, val)          range update on subtree of u
-// H.query_path(u, v)             ordered aggregate along path u -> v
-// H.query_subtree(u)             aggregate over subtree of u
-// H.lca(u, v)                    lowest common ancestor
-
 template <class ST, class T, class U = T> struct TreeHLD {
     int n, cur_pos;
     vector<vector<int>> g;

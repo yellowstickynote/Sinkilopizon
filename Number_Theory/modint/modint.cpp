@@ -1,19 +1,3 @@
-/**
- * Modular Integer (ModInt) — fixed compile-time prime modulus
- * * ModInt<MOD>     : arithmetic in Z/MOD, auto-reduces (handles negatives, no overflow).
- * * +, -, *, /      : standard arithmetic; division multiplies by modular inverse (prime MOD).
- * * cin >>, cout << : stream IO.
- * * pow(b) / power  : fast exponentiation a^b (b may be negative).
- * * inv()           : modular inverse via Fermat, a^(MOD-2).
- * * fact(n)         : n! cached, grows on demand.
- * * inv_fact(n)     : (n!)^-1 cached.
- * * choose(n, k)    : binomial coefficient C(n, k).
- * * perm(n, k)      : falling factorial n! / (n-k)!.
- * * multichoose(n,k): stars and bars C(n+k-1, k).
- * * catalan(n)      : n-th Catalan number.
- * Static helpers are called on the type, e.g. mint::choose(n, k).
- * Default alias: using mint = ModInt<1000000007>.
- */
 template <signed MOD> struct ModInt {
     int val;
 

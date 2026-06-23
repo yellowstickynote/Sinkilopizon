@@ -1,9 +1,3 @@
-// TreeLCA T(n); -> Initialize 1-indexed tree with n nodes
-// T.add_edge(u, v); -> Add bidirectional/undirected edge between u and v
-// T.build(root); -> Precompute depth and binary lifting table (default root = 1)
-// T.lca(u, v); -> Find Lowest Common Ancestor of u and v in O(log n)
-// T.kth_parent(u, k); -> Find k-th ancestor of u in O(log n), returns 0 if out of bounds
-// T.dist(u, v); -> Find distance (number of edges) between u and v in O(log n)
 struct TreeLCA {
     int n, lg;
     vector<vector<int>> g, up;

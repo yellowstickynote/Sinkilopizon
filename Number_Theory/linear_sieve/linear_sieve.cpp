@@ -1,12 +1,3 @@
-/**
- * Linear Sieve — smallest prime factor in O(N)
- * * LinearSieve(n)   : sieve [0, n], O(n).
- * * spf[i]           : smallest prime factor of i (spf[i] == i iff i prime).
- * * primes           : all primes in [2, n], ascending.
- * * is_prime(x)      : true iff x in [2, n] is prime, O(1).
- * * factorize(x)     : prime factorization as {prime, exponent} pairs, O(log x).
- * * divisors(x)      : all divisors of x, unsorted, O(d(x) + log x).
- */
 struct LinearSieve {
     int n;
     vector<int> spf, primes;

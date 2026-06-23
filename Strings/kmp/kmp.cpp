@@ -1,9 +1,7 @@
 struct KMP {
     string pat;
     vector<int> pi;
-
     KMP(const string &p) : pat(p), pi(prefix(p)) {}
-
     static vector<int> prefix(const string &s) {
         vector<int> pi(s.size(), 0);
         for (int i = 1, j; i < (int)s.size(); i++) {
@@ -12,7 +10,6 @@ struct KMP {
         }
         return pi;
     }
-
     vector<int> find_all(const string &t) const {
         vector<int> occ;
         int m = pat.size(), j = 0;
@@ -22,17 +19,8 @@ struct KMP {
         }
         return occ;
     }
-
     int count(const string &t) const { return find_all(t).size(); }
-
     int period() const { return pat.empty() ? 0 : pat.size() - pi.back(); }
-
-    vector<int> borders() const {
-        vector<int> res;
-        for (int b = pi.empty() ? 0 : pi.back(); b; b = pi[b - 1]) res.push_back(b);
-        return res;
-    }
-
     vector<vector<int>> automaton(int sigma = 26, char base = 'a') const {
         string s = pat + char(0);
         vector<int> p = prefix(s);

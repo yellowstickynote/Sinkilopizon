@@ -20,7 +20,6 @@ struct KMP {
         return occ;
     }
     int count(const string &t) const { return find_all(t).size(); }
-    int period() const { return pat.empty() ? 0 : pat.size() - pi.back(); }
     vector<vector<int>> automaton(int sigma = 26, char base = 'a') const {
         string s = pat + char(0);
         vector<int> p = prefix(s);

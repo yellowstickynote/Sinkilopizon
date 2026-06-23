@@ -6,9 +6,8 @@
 
 String matching via the **prefix function** (failure function). Constructed from a
 pattern, it finds all occurrences in a text in linear time, and exposes the
-prefix-function machinery for the related tasks that show up in competitive
-programming: smallest period, borders, and a DP-friendly automaton. All indices
-are 0-based.
+prefix-function machinery plus a DP-friendly automaton for the string problems
+that show up in competitive programming. All indices are 0-based.
 
 ## API
 
@@ -19,8 +18,6 @@ are 0-based.
 | `pi` | Prefix function of the pattern. |
 | `find_all(text)` | Start indices of every occurrence of `pat` in `text`. |
 | `count(text)` | Number of occurrences of `pat` in `text`. |
-| `period()` | Smallest period `p` of `pat` (`pat[i] == pat[i+p]`); fully periodic iff `m % period() == 0`. |
-| `borders()` | All border lengths (proper prefixes that are also suffixes), descending. |
 | `automaton(sigma, base)` | KMP automaton: `aut[state][c]` = next state after reading `base + c`. |
 
 ## Automaton

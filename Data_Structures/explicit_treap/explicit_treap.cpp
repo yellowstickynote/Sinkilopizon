@@ -1,31 +1,3 @@
-/**
- * Explicit (Key-Ordered) Treap Forest — Lazy Propagation.
- *
- *   K : key type ordering the set (needs operator<); keys unique within a tree.
- *   T : value/aggregate type (e.g. int sum, struct for min/max).
- *   U : lazy-tag type over key ranges (e.g. int range-add, affine struct).
- * Instantiate ONCE as Treap<K>, Treap<K,T>, or Treap<K,T,U>; it owns all trees of
- * that type. A tree is a root index you track yourself; init() hands you an empty one.
- *
- * Mutators take the root by reference and are void, so a root that shifts is written
- * back automatically. Pure reads return their result. Ranges are CLOSED [lo,hi].
- *
- *   init()              : return a fresh empty tree (== 0).
- *   split(x,k,a,b,eq)   : cut x by key; a,b get the two sides. eq=false -> {<k}|{>=k},
- *                         eq=true -> {<=k}|{>k}.
- *   merge(a,b,c)        : CONCATENATE ordered disjoint subtrees (all keys in a < all
- *                         keys in b); result -> c. Use for split-then-rejoin.
- *   unite(a,b,c)        : key-set UNION of two arbitrary trees, O(M log(N/M)); result
- *                         -> c. On a shared key keeps a's node. Inputs are consumed.
- *   intersect(a,b,c)    : key-set INTERSECTION (keys in both), O(M log(N/M)); result
- *                         -> c, nodes taken from a. Inputs are consumed.
- *   insert(r,k,v)       : add key k (no-op if present).   erase(r,k) : remove key k.
- *   upd(r,lo,hi,tag)    : apply tag over [lo,hi].
- *   query(r,lo,hi)      : aggregate over [lo,hi].          contains(r,k) : membership.
- *   order_of_key(r,k)   : number of keys < k.              kth(r,i) : key at rank i.
- *
- * Internals keep the invariant push(x) before descent, calc(x) after a child changes.
- */
 template <class K, class T = K, class U = T> struct Treap {
     T ID = 0;
     U LAZY_ID = 0;

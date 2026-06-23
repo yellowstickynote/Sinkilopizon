@@ -65,25 +65,3 @@ struct MoSolver {
     }
 };
 
-/* DOCUMENTATION & USAGE
-   ---------------------
-   Structure: MoQuery { int l, int r, id; }
-   
-   1. Setup:
-      - Define your state variables (e.g., frequency array, count) inside the struct.
-      - Initialize them in the constructor.
-      
-   2. Implementation:
-      - add(i): Update state when adding index `i` to the range.
-      - remove(i): Update state when removing index `i` from the range.
-      - answer(i): Store the current answer for query index `i`.
-      
-   3. Execution:
-      MoSolver mo(n, queries);
-      mo.solve();
-      
-   Notes:
-   - Uses Serpentine Sorting for O(N * sqrt(Q)) optimization.
-   - `i` refers to the index in the original array (0-based) for add/remove.
-   - `i` refers to the query ID for answer.
-*/

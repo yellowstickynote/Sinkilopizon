@@ -1,9 +1,8 @@
-//change merge and DEFAULT to customize
 struct SegTree {
-    static int merge(int a, int b) {
+    static int merge(int a, int b) { // customize
         return a + b;
     }
-    static const int DEFAULT = 0;
+    static const int DEFAULT = 0; // customize
     struct Node {
         int l, r;
         long long val;

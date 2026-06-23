@@ -1,15 +1,3 @@
-/**
- * Implicit Treap (lazy propagation, dual-type config). Maintains a sequence by
- * position; supports insert/erase/index, range upd/query/reverse, all O(log n).
- *   T = node/aggregate type (sum, min/max, matrix...);  U = lazy-tag type.
- * T and U default to the same type; use Treap<T,U> to separate them. Indices are
- * 0-based. comb may be NON-commutative (a reverse aggregate is tracked so reverse
- * stays correct, e.g. for affine mx+b). Only edit the Customization Section:
- *   ID/LAZY_ID  identities for comb / lazy
- *   comb        merge two aggregates (left,right order preserved)
- *   apply_val   fold a lazy tag into an aggregate spanning node_sz elements
- *   combine_lazy compose tags (old then new); needs operator!= on U
- */
 template <class T, class U = T> struct Treap {
     T ID = 0;
     U LAZY_ID = 0;

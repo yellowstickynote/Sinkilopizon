@@ -1,10 +1,3 @@
-/**
- * Iterative Lazy Segment Tree (Dual-Type Configuration)
- * * T: Data type of the tree nodes (e.g., struct for matrix, or node sums)
- * * U: Data type of the lazy tags (e.g., struct for affine transformation mx+b)
- * Default: T and U are the same type. To separate, instantiate as LazySegTree<T, U>.
- * Only edit the Customization Section at the top.
- */
 template <class T, class U = T> struct LazySegTree {
     T ID = 0;
     U LAZY_ID = 0;

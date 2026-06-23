@@ -1,7 +1,3 @@
-// Point Update, Range Query SegTree (Non-Commutative)
-// comb(a, b): order matters (a=left, b=right)
-// query(l, r): L-to-R query. query_rev(l, r): R-to-L query.
-
 template <class T> struct SegTree {
     T ID = 0; 
     int n;

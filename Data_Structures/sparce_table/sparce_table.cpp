@@ -2,8 +2,7 @@ template <typename T> class SparseTable {
   private:
 	int n, log2dist;
 	vector<vector<T>> st;
-    //change f to ur desired function
-    T f(T a,T b){
+    T f(T a,T b){ // customize
         return min(a,b);
     }
   public:

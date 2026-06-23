@@ -1,11 +1,47 @@
-int spf[N];
-vector<int> primes;
-void sieve() {
-  for(int i = 2; i < N; i++) {
-    if (spf[i] == 0) spf[i] = i, primes.push_back(i);
-    int sz = primes.size();
-    for (int j = 0; j < sz && i * primes[j] < N && primes[j] <= spf[i]; j++) {
-      spf[i * primes[j]] = primes[j];
+/**
+ * Linear Sieve — smallest prime factor in O(N)
+ * * LinearSieve(n)   : sieve [0, n], O(n).
+ * * spf[i]           : smallest prime factor of i (spf[i] == i iff i prime).
+ * * primes           : all primes in [2, n], ascending.
+ * * is_prime(x)      : true iff x in [2, n] is prime, O(1).
+ * * factorize(x)     : prime factorization as {prime, exponent} pairs, O(log x).
+ * * divisors(x)      : all divisors of x, unsorted, O(d(x) + log x).
+ */
+struct LinearSieve {
+    int n;
+    vector<int> spf, primes;
+
+    LinearSieve(int n) : n(n), spf(n + 1) {
+        for (int i = 2; i <= n; i++) {
+            if (!spf[i]) spf[i] = i, primes.push_back(i);
+            for (int p : primes) {
+                if (p > spf[i] || (long long)i * p > n) break;
+                spf[i * p] = p;
+            }
+        }
     }
-  }
-}
+
+    bool is_prime(int x) { return x >= 2 && spf[x] == x; }
+
+    vector<pair<int, int>> factorize(int x) {
+        vector<pair<int, int>> res;
+        while (x > 1) {
+            int p = spf[x], e = 0;
+            while (x % p == 0) x /= p, e++;
+            res.push_back({p, e});
+        }
+        return res;
+    }
+
+    vector<int> divisors(int x) {
+        vector<int> res = {1};
+        for (auto [p, e] : factorize(x)) {
+            int sz = res.size(), pk = 1;
+            for (int i = 0; i < e; i++) {
+                pk *= p;
+                for (int j = 0; j < sz; j++) res.push_back(res[j] * pk);
+            }
+        }
+        return res;
+    }
+};

@@ -82,7 +82,7 @@ template <class ST, class T, class U = T> struct TreeHLD {
     }
 
     void upd_node(int u, U val) {
-        tree.upd(pos[u], pos[u], val);
+        tree.upd(pos[u], val);
     }
 
     void upd_path(int u, int v, U val) {

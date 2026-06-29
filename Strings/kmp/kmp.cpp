@@ -1,3 +1,9 @@
+vector<int> to_vec(const string &s, int norm = 0) {
+    vector<int> v(s.size());
+    for (int i = 0; i < (int)s.size(); i++) v[i] = s[i] - norm;
+    return v;
+}
+
 struct KMP {
     vector<int> pat, pi;
     KMP(const vector<int> &p) : pat(p), pi(prefix(p)) {}

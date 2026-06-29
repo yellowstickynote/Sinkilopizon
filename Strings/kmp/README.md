@@ -8,12 +8,14 @@ Sequence matching via the **prefix function** (failure function). Constructed fr
 pattern (a `vector<int>`), it finds all occurrences in a text in linear time, and
 exposes the prefix-function machinery plus a DP-friendly automaton for the matching
 problems that show up in competitive programming. Works on any integer alphabet
-(use it on strings by mapping characters to ints). All indices are 0-based.
+(use `to_vec` to run it on strings by mapping characters to ints). All indices are
+0-based.
 
 ## API
 
 | Member | Effect |
 |--------|--------|
+| `to_vec(s, norm = 0)` | *(free function)* Convert a `string` to a `vector<int>` via `v[i] = s[i] - norm`, so KMP can run on text. Pass `norm` (e.g. `'a'`) to map to a small `0`-based alphabet for `automaton`. |
 | `KMP(pat)` | Build from a pattern `vector<int>`; precomputes its prefix function `pi`. |
 | `prefix(s)` | *(static)* Prefix function of any sequence `s`: `pi[i]` = longest proper prefix of `s[0..i]` that is also a suffix. |
 | `pi` | Prefix function of the pattern. |

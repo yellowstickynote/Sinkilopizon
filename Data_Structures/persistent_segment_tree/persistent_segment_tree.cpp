@@ -1,5 +1,8 @@
-struct MaxOp { template <class T> T operator()(T a, T b) const { return max(a, b); } };
-template <class T, class Comb = MaxOp> struct PersistentSegTree {
+#include <vector>
+#include <functional>
+using namespace std;
+
+template <class T, class Comb = std::plus<T>> struct PersistentSegTree {
     struct Node {
         int l, r;
         T val;

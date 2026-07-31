@@ -1,6 +1,3 @@
-#include <vector>
-using namespace std;
-
 struct MaxOp { template <class T> T operator()(T a, T b) const { return max(a, b); } };
 
 template <class T, class Comb = MaxOp> struct SegTree {

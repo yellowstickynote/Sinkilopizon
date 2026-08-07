@@ -1,5 +1,5 @@
 struct Dijkstra {
-    static const long long INF = 1e18;
+    const long long INF = 1e18;
     int n;
     long long MOD = 1e9 + 7; // modulus for shortest-path counting (customize)
     vector<vector<pair<int, int>>> adj; // adj[u] = {{v, weight}, ...}

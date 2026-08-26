@@ -1,3 +1,4 @@
+template<class T, class Add = plus<T>, class Mul = multiplies<T>>
 struct Matrix {
     int n, m;
     T zero, one;

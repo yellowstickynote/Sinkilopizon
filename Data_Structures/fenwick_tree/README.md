@@ -1,27 +1,44 @@
 # Fenwick Tree (Binary Indexed Tree)
 
-**Type:** `BIT<T>` · **Complexity:** build `O(n)`, update/prefix-sum `O(log n)`
+**Type:** `BIT<T, Comb>` · **Complexity:** build `O(n log n)`, update/query `O(log n)`
 
 ## Overview
 
-A Fenwick tree (BIT) for point updates and prefix-sum queries over an array of
-`n` elements. Indices are **0-based** in the public API. It also keeps the raw
-`arr` so `set` can compute the delta against the current value.
+A Fenwick tree for point updates and prefix queries. Indices are 0-based.
 
 ## Template parameters
 
-- `T` — element / sum type (e.g. `int`, `long long`).
+- `T` — element / aggregate type.
+- `Comb` — combining functor (defaults to `SumOp`).
 
 ## API
 
 | Method | Effect |
 |--------|--------|
-| `BIT(n)` | Empty tree over `n` elements. |
-| `set(ind, val)` | Set the value at index `ind` to `val`. |
-| `add(ind, val)` | Add `val` to the element at index `ind`. |
-| `pref_sum(ind)` | Sum of all values in `[0, ind]`. |
+| `BIT(n, id, c)` | Empty tree over `n` elements with identity `id` and combiner `c`. |
+| `BIT(v, id, c)` | Build from a `vector<T>` with identity `id` and combiner `c`. |
+| `set(pos, val)` | Set the element at `pos` to `val`. |
+| `add(pos, val)` | Add `val` to the element at `pos`. |
+| `pref_sum(pos)` | Aggregate over `[0, pos]`. |
+
+## Customization
+
+To change the combining operation, pass a custom functor.
+
+```cpp
+struct GcdOp { long long operator()(long long a, long long b) const { return std::gcd(a, b); } };
+BIT<long long, GcdOp> bit(n, 0);
+```
+
+Common operations:
+
+- **Sum (Default):** `BIT<long long> bit(n);`
+- **GCD:** `BIT<long long, GcdOp> bit(n, 0);`
+- **XOR:** `BIT<int, std::bit_xor<int>> bit(n, 0);`
 
 ## Notes
 
-- For a range sum `[l, r]`, compute `pref_sum(r) - pref_sum(l - 1)`.
 - Indices are 0-based.
+- `pref_sum(pos)` aggregates `[0, pos]`.
+- `set` uses `val - arr[pos]`, so it requires an appropriate subtraction operation on `T`.
+- `ID` is the identity of `Comb`.

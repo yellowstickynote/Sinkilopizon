@@ -1,25 +1,35 @@
-template <class T> class BIT {
-  private:
-	int size;
-	vector<T> bit;
-	vector<T> arr;
+struct SumOp { template <class T> T operator()(T a, T b) const { return a + b; } };
 
-  public:
-	BIT(int size) : size(size), bit(size + 1), arr(size) {}
+template <class T, class Comb = SumOp> struct BIT {
+    T ID;
+    Comb comb;
+    int n;
+    vector<T> bit, arr;
 
-	void set(int ind, T val) { add(ind, val - arr[ind]); }
+    BIT(int _n = 0, T id = 0, Comb c = Comb()) : ID(id), comb(c) { init(_n); }
+    BIT(const vector<T>& v, T id = 0, Comb c = Comb()) : ID(id), comb(c) {
+        init(v.size());
+        for (int i = 0; i < n; i++) add(i, v[i]);
+    }
 
-	void add(int ind, T val) {
-		arr[ind] += val;
-		ind++;
-		for (; ind <= size; ind += ind & -ind) { bit[ind] += val; }
-	}
+    void init(int _n) {
+        n = _n;
+        bit.assign(n + 1, ID);
+        arr.assign(n, ID);
+    }
 
-	T pref_sum(int ind) {
-		ind++;
-		T total = 0;
-		for (; ind > 0; ind -= ind & -ind) { total += bit[ind]; }
-		return total;
-	}
+    void set(int pos, T val) { add(pos, val - arr[pos]); }
+
+    void add(int pos, T val) {
+        arr[pos] += val;
+        for (++pos; pos <= n; pos += pos & -pos)
+            bit[pos] = comb(bit[pos], val);
+    }
+
+    T pref_sum(int pos) {
+        T res = ID;
+        for (++pos; pos; pos -= pos & -pos)
+            res = comb(res, bit[pos]);
+        return res;
+    }
 };
-

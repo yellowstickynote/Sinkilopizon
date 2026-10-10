@@ -16,7 +16,7 @@ Exact integer polynomial multiplication inside a finite field $\mathbb{Z}_{\text
 | Member / Function | Effect |
 |--------|--------|
 | `ntt(a, invert)` | In-place finite-field NTT on `vector<long long>& a`. Set `invert = true` for INTT. |
-| `multiply_ntt(a, b)` | Exact modular polynomial convolution returning coefficients modulo `MOD`. |
+| `multiply(a, b)` | Exact modular polynomial convolution returning coefficients modulo `MOD`. |
 | `power(base, exp)` | Modular exponentiation helper used to calculate roots and inverses. |
 | `modInverse(n)` | Computes $n^{-1} \pmod{\text{MOD}}$ via Fermat's Little Theorem ($n^{\text{MOD}-2}$). |
 

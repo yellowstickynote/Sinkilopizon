@@ -1,13 +1,7 @@
-vector<int> to_vec(const string &s, int norm = 0) {
-    vector<int> v(s.size());
-    for (int i = 0; i < (int)s.size(); i++) v[i] = s[i] - norm;
-    return v;
-}
-
 struct KMP {
     vector<int> pat, pi;
-    KMP(const vector<int> &p) : pat(p), pi(prefix(p)) {}
-    static vector<int> prefix(const vector<int> &s) {
+    template <class C> KMP(const C &p) : pat(p.begin(), p.end()), pi(prefix(p)) {}
+    template <class C> static vector<int> prefix(const C &s) {
         vector<int> pi(s.size(), 0);
         for (int i = 1, j; i < (int)s.size(); i++) {
             for (j = pi[i - 1]; j && s[i] != s[j]; j = pi[j - 1]);
@@ -15,7 +9,7 @@ struct KMP {
         }
         return pi;
     }
-    vector<int> find_all(const vector<int> &t) const {
+    template <class C> vector<int> find_all(const C &t) const {
         vector<int> occ;
         int m = pat.size(), j = 0;
         for (int i = 0; m && i < (int)t.size(); i++) {
@@ -24,9 +18,10 @@ struct KMP {
         }
         return occ;
     }
-    int count(const vector<int> &t) const { return find_all(t).size(); }
-    vector<vector<int>> automaton(int sigma) const {
+    template <class C> int count(const C &t) const { return find_all(t).size(); }
+    vector<vector<int>> automaton(int sigma, int norm = 0) const {
         vector<int> s = pat;
+        for (int &x : s) x -= norm;
         s.push_back(-1);
         vector<int> p = prefix(s);
         vector<vector<int>> aut(s.size(), vector<int>(sigma));

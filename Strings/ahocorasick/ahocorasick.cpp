@@ -1,20 +1,14 @@
-vector<int> to_vec(const string &s, int norm = 0) {
-    vector<int> v(s.size());
-    for (int i = 0; i < (int)s.size(); i++) v[i] = s[i] - norm;
-    return v;
-}
-
 struct AhoCorasick {
     struct Node { int back = 0, start = -1, end = -1, nmatches = 0; };
-    int sigma;
+    int sigma, norm;
     vector<Node> N;
     vector<int> nxt, backp, order, endNode, len;
 
-    int &go(int v, int c) { return nxt[v * sigma + c]; }
-    int go(int v, int c) const { return nxt[v * sigma + c]; }
+    int go(int v, int c) const { return nxt[v * sigma + c - norm]; }
 
-    AhoCorasick(const vector<vector<int>> &pat, int sigma)
-        : sigma(sigma), N(1), nxt(sigma, -1), endNode(pat.size()), len(pat.size()) {
+    template <class C>
+    AhoCorasick(const vector<C> &pat, int sigma, int norm = 0)
+        : sigma(sigma), norm(norm), N(1), nxt(sigma, -1), endNode(pat.size()), len(pat.size()) {
         for (int j = 0; j < (int)pat.size(); j++) insert(pat[j], j);
         N[0].back = N.size();
         N.emplace_back();
@@ -23,7 +17,7 @@ struct AhoCorasick {
         for (int h = 0; h < (int)order.size(); h++) {
             int n = order[h], prev = N[n].back;
             for (int c = 0; c < sigma; c++) {
-                int &ed = go(n, c), y = go(prev, c);
+                int &ed = nxt[n * sigma + c], y = nxt[prev * sigma + c];
                 if (ed == -1) ed = y;
                 else {
                     N[ed].back = y;
@@ -35,16 +29,16 @@ struct AhoCorasick {
         }
     }
 
-    void insert(const vector<int> &s, int j) {
+    template <class C> void insert(const C &s, int j) {
         assert(!s.empty());
         int n = 0;
         for (int c : s) {
-            int m = go(n, c);
+            int m = nxt[n * sigma + c - norm];
             if (m == -1) {
                 m = N.size();
                 N.emplace_back();
                 nxt.insert(nxt.end(), sigma, -1);
-                go(n, c) = m;
+                nxt[n * sigma + c - norm] = m;
             }
             n = m;
         }
@@ -55,14 +49,14 @@ struct AhoCorasick {
         N[n].nmatches++;
     }
 
-    vector<int> find(const vector<int> &t) const {
+    template <class C> vector<int> find(const C &t) const {
         vector<int> res;
         int n = 0;
         for (int c : t) n = go(n, c), res.push_back(N[n].end);
         return res;
     }
 
-    vector<vector<int>> find_all(const vector<int> &t) const {
+    template <class C> vector<vector<int>> find_all(const C &t) const {
         vector<int> r = find(t);
         vector<vector<int>> res(t.size());
         for (int i = 0; i < (int)t.size(); i++)
@@ -80,8 +74,8 @@ struct AhoCorasick {
     }
 
     // visit(cell, i) runs on the state reached after t[i]; merge(into, from) folds up the tree
-    template <class T, class Visit, class Merge>
-    vector<T> per_pattern(const vector<int> &t, T id, Visit visit, Merge merge) const {
+    template <class T, class C, class Visit, class Merge>
+    vector<T> per_pattern(const C &t, T id, Visit visit, Merge merge) const {
         vector<T> val(N.size(), id);
         int n = 0;
         for (int i = 0; i < (int)t.size(); i++) n = go(n, t[i]), visit(val[n], i);
